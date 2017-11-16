@@ -1,0 +1,68 @@
+{% extends 'base_detail_list.html' %}
+
+{% block title %}天天生鲜-商品列表{% endblock title %}
+
+
+{% block body %}
+
+
+	<div class="main_wrap clearfix">
+
+
+		<div class="l_wrap fl clearfix">
+			<div class="new_goods">
+				<h3>新品推荐</h3>
+				<ul>
+                    {% for n in goods_new_list %}
+					<li>
+						<a href="/goods/{{ n.id }}/"><img src="/static/{{ n.goods_image }}"></a>
+						<h4><a href="/goods/{{ n.id }}/">{{ n.goods_name }}</a></h4>
+						<div class="prize">￥{{ n.goods_price }}</div>
+					</li>
+                    {% endfor %}
+				</ul>
+			</div>
+		</div>
+
+
+		<div class="r_wrap fr clearfix">
+			<div class="sort_bar">
+				<a href="/list/{{ goods_type_id }}/1/?sort=default" {% if sort == '-pk' %}class="active"{% endif %}>默认</a>
+				<a href="/list/{{ goods_type_id }}/1/?sort=price" {% if sort == 'goods_price' %}class="active"{% endif %}>价格</a>
+				<a href="/list/{{ goods_type_id }}/1/?sort=hot" {% if sort == '-goods_sales' %}class="active"{% endif %}>人气</a>
+			</div>
+
+			<ul class="goods_type_list clearfix">
+                {% for g in goods_list %}
+				<li>
+					<a href="/goods/{{ g.id }}/"><img src="/static/{{ g.goods_image }}"></a>
+					<h4><a href="/goods/{{ g.id }}/">{{ g.goods_name }}</a></h4>
+					<div class="operate">
+						<span class="prize">￥{{ g.goods_price }}</span>
+						<span class="unit">{{ g.goods_unite }}</span>
+						<a href="#" class="add_goods" title="加入购物车"></a>
+					</div>
+				</li>
+                {% endfor %}
+			</ul>
+
+			<div class="pagenation">
+                {% if goods_list.has_previous %}
+				    <a href="/list/{{ goods_type_id }}/{{ goods_list.previous_page_number }}">&lt;上一页</a>
+                {% endif %}
+
+                {% for pindex in pages %}
+                    <a href="/list/{{ goods_type_id }}/{{ pindex }}" {% if pindex == goods_list.number %}class="active" {% endif %}>{{ pindex }}</a>
+                {% endfor %}
+                {% if goods_list.has_next %}
+				    <a href="/list/{{ goods_type_id }}/{{ goods_list.next_page_number }}">下一页&gt;</a>
+                {% endif %}
+			</div>
+		</div>
+
+
+
+
+	</div>
+
+{% endblock body %}

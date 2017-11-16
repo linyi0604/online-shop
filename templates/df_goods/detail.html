@@ -1,0 +1,156 @@
+{% extends 'base_detail_list.html' %}
+
+{% block topfiles %}
+    <script src="/static/js/jquery-1.12.4.min.js"></script>
+    <script>
+        $(function(){
+            update_total();
+            //点击增加按钮
+            $('.add').click(function(){
+                $('.num_show').val( parseInt($('.num_show').val())+1 );
+                update_total();
+            });
+            //点击减少
+            $('.minus').click(function(){
+                if(parseInt($('.num_show').val())>1 ){
+                    $('.num_show').val( parseInt($('.num_show').val())-1 );
+                }
+                update_total();
+            });
+
+            // 手动输入数量
+            $('.num_show').blur(function(){
+                val = $(this).val();
+                if( isNaN(val) ){
+                    $(this).val(1);
+                    update_total();
+                }
+                else{
+                    update_total();
+                }
+            });
+
+            //更新总价格函数
+            function update_total(){
+                $('.total em').text(
+                    (
+                        parseFloat($('.num_show').val())
+                        * parseFloat($('.show_pirze em').text()))
+                        .toFixed(2)+'元'
+                );
+            }
+
+        });
+    </script>
+{% endblock topfiles %}
+
+
+{% block body %}
+
+
+    	<div class="goods_detail_con clearfix">
+		<div class="goods_detail_pic fl"><img src="/static/{{ img.img_url }}"></div>
+
+		<div class="goods_detail_list fr">
+			<h3>{{ goods.goods_name }}</h3>
+			<p>{{ goods.goods_sub_title }}</p>
+			<div class="prize_bar">
+				<span class="show_pirze">¥<em>{{ goods.goods_price }}</em></span>
+				<span class="show_unit">单  位：{{ goods.goods_unite }}</span>
+			</div>
+			<div class="goods_num clearfix">
+				<div class="num_name fl">数 量：</div>
+				<div class="num_add fl">
+					<input type="text" class="num_show fl" value="1">
+					<a href="javascript:;" class="add fr">+</a>
+					<a href="javascript:;" class="minus fr">-</a>
+				</div>
+			</div>
+			<div class="total">总价：<em>16.80元</em></div>
+			<div class="operate_btn">
+				<a href="javascript:;" class="buy_btn">立即购买</a>
+				<a href="javascript:;" class="add_cart" id="add_cart">加入购物车</a>
+			</div>
+		</div>
+	</div>
+
+	<div class="main_wrap clearfix">
+		<div class="l_wrap fl clearfix">
+			<div class="new_goods">
+				<h3>新品推荐</h3>
+				<ul>
+                    {% for g in goods_new %}
+					<li>
+						<a href="/goods/{{ g.id }}"><img src="/static/{{ g.goods_image }}"></a>
+						<h4><a href="/goods/{{ g.id }}">{{ g.goods_name }}</a></h4>
+						<div class="prize">￥{{ g.goods_price }}</div>
+					</li>
+                    {% endfor %}
+				</ul>
+			</div>
+		</div>
+
+		<div class="r_wrap fr clearfix">
+			<ul class="detail_tab clearfix">
+				<li class="active">商品介绍</li>
+				<li>评论</li>
+			</ul>
+
+			<div class="tab_content">
+				<dl>
+					<dt>商品详情：</dt>
+					<dd>{{ goods.goods_info|safe }}</dd>
+				</dl>
+			</div>
+
+		</div>
+	</div>
+    <div class="add_jump"></div>
+
+{% endblock body %}
+
+{% block bottomfiles %}
+{#  判断是否登陆，如果登陆后 进行添加购物车逻辑  #}
+<script>
+    //点击添加购物车按钮
+    $('.add_cart').click(function(){
+
+
+
+
+
+        {% if request.session.islogin %}
+            var goods_id = {{ goods.id }};
+            var goods_count = $('.num_show').val();
+
+            //如果登陆了 发ajax到后台 进行对购物车表进行操作
+            $.get('/cart/add/?goods_id='+goods_id+'&goods_count='+goods_count,function(data){
+                //如果成功 返回{'res':1}  否则返回{'res':0}
+                if(data.res == 0){
+                    alert('库存不足，添加失败！')
+                }else{
+                    // 添加成功，进行动画，修改页面的数字
+                    var start_left = $('#add_cart').offset().left;
+                    var start_top = $('#add_cart').offset().top;
+                    var end_top = $('.cart_name').offset().top+10;
+                    var end_left = $('.cart_name').offset().left+50;
+                    $(".add_jump")
+                        .css({'top':start_top,'left':start_left})
+                        .show().stop()
+                        .animate({'top':end_top,'left':end_left},function(){
+                            var num1 = parseInt( $('#show_count').html() );
+                            var num2 = parseInt( $('.num_show').val() );
+                            $('#show_count').html(num1+num2);
+                            $(".add_jump").hide();
+                        });
+                }
+
+            });
+        {% else %}
+            location.href = '/user/login/';
+        {% endif %}
+    });
+
+
+</script>
+{% endblock bottomfiles %}

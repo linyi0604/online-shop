@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+
+{% block title %}天天生鲜-登录{% endblock title %}
+{% block topfiles %}
+    <script src="/static/js/jquery-1.12.4.min.js"></script>
+    <script>
+        $(function(){
+            $("#username").focus(function(){
+                $('#user_error').hide();
+            });
+            $("#password").focus(function(){
+                $('#pwd_error').hide();
+            });
+
+            $("#username").blur(function(){
+                if($("#username").val() == "")  $('#user_error').text('用户名不能为空！').show();
+            });
+            $("#password").blur(function(){
+                if($("#password").val() == "")  $('#pwd_error').text('密码不能为空！').show();
+            });
+
+
+            //如果用户名和密码都正确 就提交表单
+            $('#form').submit(function(){
+                resData = {
+                    'csrfmiddlewaretoken':$('input[type="hidden"]').val() ,
+                    'username' : $('input[name="username"]').val(),
+                    'remember_user':$('#remember_user').is(':checked'),
+                    'password' : $('input[name="pwd"]').val()
+                };
+                $.ajax({
+                    url : $('#form').prop("action") ,
+                    type : $('#form').prop("method") ,
+                    data: resData
+                }).done(function(data){
+                    /*
+                    *   如果返回状态1 代表能够登录成功
+                    *   如果返回状态2 代表登录用户名错误
+                    *   如果返回状态3 代表密码错误
+                    * */
+                    if( data.state == 1 ){    //登录成功
+                        location.href = data.next ;
+                    }else if( data.state == 2 ){  //用户名不存在
+                        $('#user_error').show();
+                    }else{  //密码错误
+                        $('#pwd_error').show();
+                    }
+                });
+                return false;
+            });
+
+        });
+    </script>
+{% endblock topfiles %}
+{% block header_con %}{% endblock %}
+{% block search_bar %}{% endblock search_bar %}
+{% block body %}
+	<div class="login_top clearfix">
+		<a href="/" class="login_logo"><img src="/static/images/logo02.png"></a>
+	</div>
+
+	<div class="login_form_bg">
+		<div class="login_form_wrap clearfix">
+			<div class="login_banner fl"></div>
+			<div class="slogan fl">日夜兼程 · 急速送达</div>
+			<div class="login_form fr">
+				<div class="login_title clearfix">
+					<h1>用户登录</h1>
+					<a href="/user/register/">立即注册</a>
+				</div>
+				<div class="form_input">
+					<form id="form" method="post" action="/user/login_check/">
+                        {% csrf_token %}
+						<input id="username" type="text" name="username" class="name_input" placeholder="请输入用户名" value="{{ username }}">
+						<div id="user_error" class="user_error">输入错误，用户名不存在</div>
+						<input id="password" type="password" name="pwd" class="pass_input" placeholder="请输入密码">
+						<div id="pwd_error" class="pwd_error">输入错误，密码不正确</div>
+						<div class="more_input clearfix">
+							<input id="remember_user" type="checkbox" name="">
+							<label>记住用户名</label>
+							<a href="#">忘记密码</a>
+						</div>
+						<input id='submit' type="submit" name="" value="登录" class="input_submit">
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+{% endblock body %}
+
+{% block footer %}
+	<div class="footer no-mp">
+		<div class="foot_link">
+			<a href="#">关于我们</a>
+			<span>|</span>
+			<a href="#">联系我们</a>
+			<span>|</span>
+			<a href="#">招聘人才</a>
+			<span>|</span>
+			<a href="#">友情链接</a>
+		</div>
+		<p>CopyRight © 2016 北京天天生鲜信息技术有限公司 All Rights Reserved</p>
+		<p>电话：010-****888    京ICP备*******8号</p>
+	</div>
+{% endblock footer %}

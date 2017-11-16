@@ -1,0 +1,169 @@
+{% extends 'base_user_center.html' %}
+
+
+{% block title %}天天生鲜-提交订单{% endblock title %}
+{% block btitle %}提交订单{% endblock btitle %}
+{% block topfiles %}
+
+    <script src="/static/js/jquery-1.12.4.min.js"></script>
+    <script>
+        $(function(){
+            //更新总计数量 金额 运费的全局变量
+            total_count = 0;
+            total_count_price = 0;
+            total_transit = 0;
+
+            $('.goods_list_td').each(function(){
+                //更新每个商品的小计
+                update($(this));
+            });
+            update_tota_count_price_unite();    // 更新 商品总数量 总金额 运费 付款金额
+
+            //传入ul标签 更新每个小计金额
+            function update($ul){
+                var count = parseInt($ul.find('.col06').html()) ;
+                var price = parseFloat($ul.find('.col05').html());
+                var total_price = count * price ;
+                var transit = parseFloat($ul.find('.transit_price').val());
+                total_count += count;
+                total_count_price+=total_price;
+                total_transit += transit;
+                $ul.find('.col07').html(total_price.toFixed(2));
+            }
+
+            // 更新 商品总数量 总金额 运费 付款金额
+            function update_tota_count_price_unite(){
+                $('.total_goods_count').children('em').html(total_count);
+                $('.total_goods_count').children('b').html(total_count_price.toFixed(2)+'元');
+                total_transit=10;   //运费，假数据
+                $('.transit').children('b').html(total_transit.toFixed(2)+'元');
+                var real_price = total_count_price + total_transit;
+                $('.total_pay').children('b').html(real_price.toFixed(2)+'元');
+            }
+        });
+
+    </script>
+
+{% endblock topfiles %}
+{% block body %}
+	
+	<h3 class="common_title">确认收货地址</h3>
+
+	<div class="common_list_con clearfix">
+		<dl>
+			<dt>寄送到：</dt>
+			<dd><input type="radio" name="addr_id" value="{{ addr.id }}" checked="">{{ addr.recipient_addr }} （{{ addr.recipient_name }} 收） {{ addr.recipient_phone }}</dd>
+		</dl>
+		<a href="" class="edit_site">编辑收货地址</a>
+
+	</div>
+	
+	<h3 class="common_title">支付方式</h3>	
+	<div class="common_list_con clearfix">
+		<div class="pay_style_con clearfix">
+			<input type="radio" name="pay_style" checked value="1">
+			<label class="cash">货到付款</label>
+			<input type="radio" name="pay_style" value="2">
+			<label class="weixin">微信支付</label>
+			<input type="radio" name="pay_style" value="3">
+			<label class="zhifubao"></label>
+			<input type="radio" name="pay_style" value="4">
+			<label class="bank">银行卡支付</label>
+		</div>
+	</div>
+
+	<h3 class="common_title">商品列表</h3>
+	
+	<div class="common_list_con clearfix">
+		<ul class="goods_list_th clearfix">
+			<li class="col01">商品名称</li>
+			<li class="col02">商品单位</li>
+			<li class="col03">商品价格</li>
+			<li class="col04">数量</li>
+			<li class="col05">小计</li>		
+		</ul>
+    {% for cart in cart_list %}
+		<ul class="goods_list_td clearfix">
+			<li class="col01">{{ forloop.counter }}</li>
+			<li class="col02"><img src="/static/{{ cart.goods.goods_image }}"></li>
+			<li class="col03">{{ cart.goods.goods_name }}</li>
+			<li class="col04">{{ cart.goods.goods_unite }}</li>
+			<li class="col05">{{ cart.goods.goods_price }}元</li>
+			<li class="col06">{{ cart.goods_count }}</li>
+			<li class="col07">16.80元</li>
+            <input type="hidden" class="transit_price" value="{{ cart.goods.transit_price }}">
+		</ul>
+
+    {% endfor %}
+	</div>
+
+	<h3 class="common_title">总金额结算</h3>
+
+	<div class="common_list_con clearfix">
+		<div class="settle_con">
+			<div class="total_goods_count">共<em>2</em>件商品，总金额<b>42.60元</b></div>
+			<div class="transit">运费：<b>10元</b></div>
+			<div class="total_pay">实付款：<b>52.60元</b></div>
+		</div>
+	</div>
+
+	<div class="order_submit clearfix">
+		<a href="javascript:;" cart_id_list="{{ cart_id_list }}" id="order_btn">提交订单</a>
+	</div>	
+
+
+	<div class="popup_con">
+		<div class="popup">
+			<p>订单提交成功！</p>
+		</div>
+		
+		<div class="mask"></div>
+	</div>
+    {% csrf_token %}
+
+{% endblock body %}
+
+{% block bottomfiles %}
+	<script type="text/javascript">
+		$('#order_btn').click(function() {
+		    // 获取地址id 支付方式 和 购物车id
+		    var addr_id = $("input[name='addr_id").val();
+		    var pay_style = $("input[name='pay_style']:checked").val();
+		    var cart_id_list = $('#order_btn').attr('cart_id_list');
+		    var csrf_token = $('input[name="csrfmiddlewaretoken"]').val();
+		    var data = {
+		        'addr_id':addr_id,
+                'pay_style':pay_style,
+                'cart_id_list':cart_id_list,
+                'csrfmiddlewaretoken':csrf_token
+            };
+            $.ajax({
+                type:'post',
+                data:data,
+                url:'/order/commit/'
+            }).done(function(data){
+                // res：  0库存不足  1提交成功  2订单错误
+                if(data.res==0){    //库存不足
+                    alert('库存不足！');
+                }else if(data.res ==2){  // 订单错误
+                    alert('订单发生错误！');
+                }else if(data.res==1) {  //提交成功
+                    localStorage.setItem('order_finish',2);
+                    $('.popup_con').fadeIn('fast', function() {
+
+                        setTimeout(function(){
+                            $('.popup_con').fadeOut('fast',function(){
+                                window.location.href = '/user/order/';
+                            });
+                        },3000)
+
+			        });
+                }else{
+                    alert('发生未知错误！');
+                }
+            }).fail(function(){
+                alert('网络错误！');
+            });
+		});
+	</script>
+{% endblock bottomfiles %}

@@ -1,0 +1,52 @@
+{% extends 'base_user_center.html' %}
+{% load filters %}
+{% block content %}
+		<div class="right_content clearfix">
+				<h3 class="common_title2">全部订单</h3>
+            {% for order_basic in order_basic_list %}
+				<ul class="order_list_th w978 clearfix">
+					<li class="col01">{{ order_basic.create_time|date:'Y-m-d h:i:s' }}</li>
+					<li class="col02">订单号：{{ order_basic.order_id }}</li>
+					<li class="col02 stress">{{ order_basic.order_status|order_status }}</li>
+				</ul>
+                    <table class="order_list_table w980">
+                        <tbody>
+                            <tr>
+                                <td width="55%">
+                            {% for order_detail in order_basic.order_detail_list %}
+                                    <ul class="order_goods_list clearfix">
+                                        <li class="col01"><img src="/static/{{ order_detail.goods.goods_image }}"></li>
+                                        <li class="col02">{{ order_detail.goods.goods_name }}<em>{{ order_detail.goods.goods_price }}元/{{ order_detail.goods.goods_unite }}</em></li>
+                                        <li class="col03">{{ order_detail.goods_count }}</li>
+                                        <li class="col04">11.80元</li>
+                                    </ul>
+                            {% endfor %}
+                                </td>
+                                <td width="15%">{{ order_basic.total_price }}元</td>
+                                <td width="15%">{{ order_basic.order_status|order_status }}</td>
+                                <td width="15%"><a href="#" class="oper_btn">去付款</a></td>
+                            </tr>
+
+
+                        </tbody>
+                    </table>
+
+
+            {% endfor %}
+
+
+				<div class="pagenation">
+                {% if order_basic_list.has_previous %}
+				    <a href="/user/order/{{ order_basic_list.previous_page_number }}/">&lt;上一页</a>
+                {% endif %}
+
+                {% for pindex in pages %}
+                    <a href="/user/order/{{ pindex }}/" {% if pindex == order_basic_list.number %}class="active" {% endif %}>{{ pindex }}</a>
+                {% endfor %}
+                {% if order_basic_list.has_next %}
+				    <a href="/user/order/{{ order_basic_list.next_page_number }}/">下一页&gt;</a>
+                {% endif %}
+			</div>
+		</div>
+{% endblock content %}
+

@@ -1,0 +1,115 @@
+
+
+user_info 用户账户表： 保存用户的基本信息
+    字段          类型          备注
+    id           int           主键
+    username    varchar(20)     用户名
+    password    varchar(40)     密码      要存hash加密之后的秘文，取hash密码之后要40位去存
+    email       varchar(60)     邮箱
+    isDelete      tinyint       逻辑删除标记
+    create_time   date          创建时间
+    update_date   date          更新时间
+
+
+s_user_address 地址表：存放用户的地址信息
+    字段              类型          备注
+    id               int           主键
+    passport_id      int           外键　　地址所属的用户
+    recipient_name  varchar(20)   收件人
+    recipient_addr  varchar(128)  收件地址
+    zip_code        varchar(6)     邮编
+    recipient_phone varchar(11)   收件电话
+    isDelete        tinyint       逻辑删除标记
+    create_time     date          创建时间
+    update_date     date          更新时间
+
+
+商品种类：　
+    字段              类型          备注
+    id               int          主键
+    type_title      varchar(20)  商品种类名称
+    isDelete        tinyint       逻辑删除标记
+    create_time     date          创建时间
+    update_date     date          更新时间
+
+
+商品信息表：
+    字段              类型          备注
+    id                int          主键
+    goods_type_id     int           外键 商品种类的id
+    goods_name        varchar(24)    商品描述
+    goods_sub_title   varchar(128)  商品副标题
+    transit_price     decimal(10,2) 商品运费 十进制小数 10位，2位小数
+    goods_price       decimal(10,2) 商品价格，十进制小数，最长10位，2位小数
+    goods_unite       varchar(10)   商品单位
+    goods_info        longtext      商品详细描述信息，长文本类型存储
+    goods_stock       int           商品库存
+    goods_sales       int           商品销量
+    goods_status      int           商品状态
+    goods_img         varchar(128)  商品图片的路径
+    isDelete          tinyint       逻辑删除标记
+    create_time       date          创建时间
+    update_date       date          更新时间
+
+
+
+s_goods_image商品图片信息表：保存商品的详情页图片信息
+    字段              类型          备注
+    id                int          主键
+    goods_id          int          外键 商品id
+    img_url           varchar(128) 记录商品图片的地址
+    isDelete          tinyint       逻辑删除标记
+    create_time       date          创建时间
+    update_date       date          更新时间
+
+
+s_browse_history历史浏览信息表：保存用户的历史浏览信息
+    字段              类型          备注
+    id                int          主键
+    goods_id          int          外键 商品id
+    passport_id        int          外键 账户id
+    isDelete          tinyint       逻辑删除标记
+    create_time       date          创建时间
+    update_date       date          更新时间
+
+
+s_cart购物车表：保存用户购物车中的商品信息
+    字段              类型          备注
+    id                int          主键
+    goods_id          int          外键 商品id
+    passport_id       int          外键 用户id
+    good_count        int          商品数量
+    isDelete          tinyint       逻辑删除标记
+    create_time       date          创建时间
+    update_date       date          更新时间
+
+
+s_order_basic 订单信息表：保存用户的订单
+    字段              类型          备注
+    order_id         varchar(40)   主键 订单编号
+    passport_id       int           外键 账户id
+    addr_id           int           外键 地址id
+    total_count       int           商品总数
+    total_price       decimal(10,2) 订单的总金额
+    tansit_price      decimal(10,2) 订单运费
+    pay_method        int           支付方式 1货到付款 2微信支付 3支付宝支付 4银联
+    order_state       int           订单状态： 1待支付 2待收货 3待评价 4已完成
+    isDelete          tinyint       逻辑删除标记
+    create_time       date          创建时间
+    update_date       date          更新时间
+
+
+s_order_detail订单详情信息表：保存订单详细信息
+    字段              类型          备注
+    id                int           主键
+    order_int         int           外键 订单id
+    goods_id          int           外键 商品id
+    goods_count       int           商品数目
+    goods_price       decimal(10,2) 商品价格
+    isDelete          tinyint       逻辑删除标记
+    create_time       date          创建时间
+    update_date       date          更新时间
+
+
+
+
